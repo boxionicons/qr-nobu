@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wahyu Store API Services</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --dark: #1e293b;
+            --darker: #0f172a;
+            --light: #f8fafc;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: #e0e7ef;
+            min-height: 100vh;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+        
+        .api-section, .endpoint-card, .product-card {
+            background: rgba(30, 41, 59, 0.92);
+            box-shadow: 0 4px 24px 0 rgba(99, 102, 241, 0.18), 0 1.5px 6px 0 rgba(139, 92, 246, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        .api-section:hover, .endpoint-card:hover, .product-card:hover {
+            box-shadow: 0 12px 32px 0 rgba(99, 102, 241, 0.3), 0 2px 8px 0 rgba(139, 92, 246, 0.2);
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+        
+        .method-badge {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-transform: uppercase;
+        }
+        
+        .method-get { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+        .method-post { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); }
+        .method-put { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
+        .method-delete { background: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%); }
+        
+        .api-url {
+            background: rgba(15, 23, 42, 0.7);
+            color: #e0e7ef;
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            transition: all 0.3s ease;
+            word-break: break-all;
+        }
+        
+        .result-section pre {
+            background: rgba(15, 23, 42, 0.8) !important;
+            color: #a7f3d0 !important;
+            border-radius: 8px;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            font-family: 'Fira Code', monospace;
+            transition: all 0.3s ease;
+        }
+        
+        footer {
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: #94a3b8;
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .search-bar {
+            background: rgba(15, 23, 42, 0.7) !important;
+            color: #e0e7ef !important;
+            border: 1px solid rgba(99, 102, 241, 0.3) !important;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+        }
+        
+        .search-bar:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
+        }
+        
+        /* Animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Social buttons */
+        .social-oval {
+            border-radius: 50px;
+            padding: 8px 15px;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        /* API Key Product */
+        .product-highlight {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .feature-check {
+            position: relative;
+            padding-left: 28px;
+        }
+        
+        .feature-check::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .order-button {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .order-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Page system */
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .nav-link {
+            position: relative;
+            padding-bottom: 5px;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+    <!-- Header -->
+    <header class="text-white relative">
+        <div class="container mx-auto px-6 py-8 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div class="mb-6 md:mb-0">
+                    <h1 class="text-3xl font-bold mb-2">Wahyu Store</h1>
+                    <div class="flex space-x-6">
+                        <button class="nav-link text-white active" data-page="docs">API Documentation</button>
+                        <button class="nav-link text-white" data-page="products">Buy API Key</button>
+                        <button class="nav-link text-white" data-page="cekstatus">Cek Status API Key</button>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="https://wa.me/6283189912927" class="tooltip" target="_blank">
+                        <div class="bg-emerald-600 p-3 rounded-full hover:bg-emerald-500 transition social-oval">
+                            <i class="fab fa-whatsapp mr-2"></i>
+                            <span>WhatsApp</span>
+                        </div>
+                    </a>
+                    <a href="https://github.com/" class="tooltip" target="_blank">
+                        <div class="bg-gray-800 p-3 rounded-full hover:bg-gray-700 transition social-oval">
+                            <i class="fab fa-github mr-2"></i>
+                            <span>GitHub</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Documentation Page -->
+    <div id="docs-page" class="page active">
+        <main class="container mx-auto px-6 py-12">
+            <!-- Hero Section -->
+            <div class="mb-16 text-center">
+                <h2 class="text-3xl font-bold mb-6">API Documentation</h2>
+                <p class="text-lg max-w-3xl mx-auto opacity-90">Explore our powerful APIs and integrate them into your applications with ease.</p>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="mb-12 animate__animated animate__fadeIn">
+                <div class="relative max-w-2xl mx-auto">
+                    <input type="text" 
+                           placeholder="Search APIs..." 
+                           class="w-full px-6 py-4 rounded-xl search-bar focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
+                    <div class="absolute right-3 top-3 text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Categories -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                <div class="api-section p-8 transform transition-all duration-300 hover:scale-105 floating">
+                    <div class="text-indigo-400 text-5xl mb-6">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">QRIS Services</h3>
+                    <p class="text-gray-400">Create, check status, and manage QRIS payments through our API endpoints.</p>
+                </div>
+
+                <div class="api-section p-8 transform transition-all duration-300 hover:scale-105 floating delay-1">
+                    <div class="text-pink-500 text-5xl mb-6">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Pulsa & Kuota</h3>
+                    <p class="text-gray-400">Check prices and purchase pulsa/kuota for all major providers in Indonesia.</p>
+                </div>
+
+                <div class="api-section p-8 transform transition-all duration-300 hover:scale-105 floating delay-2">
+                    <div class="text-amber-400 text-5xl mb-6">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">API Key Management</h3>
+                    <p class="text-gray-400">Create, update, and manage API keys for accessing our services.</p>
+                </div>
+            </div>
+
+            <!-- API Endpoints -->
+            <div class="mb-16">
+                <h2 class="text-2xl font-bold mb-8 flex items-center">
+                    <span>API Endpoints</span>
+                    <span class="ml-2 text-xs bg-indigo-900 text-indigo-300 px-2 py-1 rounded-full">v1.0</span>
+                </h2>
+                
+                <div class="space-y-6" id="dynamic-api-section">
+                    <!-- Dynamic API categories and endpoints will be rendered here -->
+                </div>
+            </div>
+
+            <!-- API Key Info -->
+            <div class="api-section p-8 mb-16 animate__animated animate__fadeIn">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-key mr-2 text-amber-400"></i>
+                    <span>API Key Information</span>
+                </h3>
+                <p class="text-gray-400 mb-4">All API requests require an API key. You can get a premium API key with higher limits.</p>
+                <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-mono text-sm text-indigo-300">Your API Key:</span>
+                        <button class="text-xs bg-indigo-900 text-indigo-300 px-2 py-1 rounded hover:bg-indigo-800 transition copy-apikey">
+                            <i class="fas fa-copy mr-1"></i> Copy
+                        </button>
+                    </div>
+                    <div class="font-mono text-sm bg-gray-900 p-3 rounded break-all">p</div>
+                </div>
+                <div class="mt-4 text-center">
+                    <button class="text-indigo-400 hover:text-indigo-300 transition font-medium" data-page="products">
+                        <i class="fas fa-arrow-right mr-2"></i> Get Premium API Key
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Products Page -->
+    <div id="products-page" class="page">
+        <main class="container mx-auto px-6 py-12">
+            <!-- Hero Section -->
+            <div class="mb-16 text-center">
+                <h2 class="text-3xl font-bold mb-6">API Key Packages</h2>
+                <p class="text-lg max-w-3xl mx-auto opacity-90">Choose the right package for your application needs</p>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <!-- Basic Plan -->
+                <div class="product-card p-8">
+<div class="flex justify-between items-start mb-2">
+  <div class="text-yellow-500 text-4xl">
+    <i class="fas fa-star"></i>
+  </div>
+  <span class="bg-yellow-500 text-yellow-100 text-xs px-3 py-1 rounded-full">POPULAR</span>
+</div>
+                    <h3 class="text-xl font-semibold mb-2">Basic</h3>
+                    <div class="text-3xl font-bold mb-4">Rp 10.000<span class="text-sm text-gray-400">/month</span></div>
+                    <ul class="space-y-3 mb-6">
+                        <li class="feature-check">Expired 30 days</li>
+                        <li class="feature-check">Akses penuh ke semua endpoint</li>
+                        <li class="feature-check">Rate limit standar</li>
+                        <li class="feature-check">Basic analytics</li>
+                    </ul>
+                    <a href="https://wa.me/6283189912927?text=Saya%20ingin%20membeli%20API%20Key%20Basic" 
+                       class="block text-center order-button text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300">
+                        Order via WhatsApp
+                    </a>
+                </div>
+
+                <!-- Premium Plan (Featured) -->
+                <div class="product-card p-8 product-highlight transform scale-105">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="text-purple-400 text-4xl">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <span class="bg-purple-900 text-purple-300 text-xs px-3 py-1 rounded-full">POPULAR</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Premium</h3>
+                    <div class="text-3xl font-bold mb-4">Rp 25.000<span class="text-sm text-gray-400">/month</span></div>
+                    <ul class="space-y-3 mb-6">
+                        <li class="feature-check">Expired 60 days</li>
+                        <li class="feature-check">Akses penuh ke semua endpoint</li>
+                        <li class="feature-check">Dukungan teknis 24/7</li>
+                        <li class="feature-check">Higher rate limits</li>
+                    </ul>
+                    <a href="https://wa.me/6283189912927?text=Saya%20ingin%20membeli%20API%20Key%20Premium" 
+                       class="block text-center order-button text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300">
+                        Order via WhatsApp
+                    </a>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div class="product-card p-8">
+<div class="flex justify-between items-start mb-4">
+  <div class="text-amber-400 text-4xl">
+    <i class="fas fa-rocket"></i>
+  </div>
+  <span class="bg-yellow-500 text-yellow-100 text-xs px-3 py-1 rounded-full">POPULAR</span>
+</div>
+                    <h3 class="text-xl font-semibold mb-2">Enterprise</h3>
+                    <div class="text-3xl font-bold mb-4">Rp 35.000<span class="text-sm text-gray-400">/month</span></div>
+                    <ul class="space-y-3 mb-6">
+                        <li class="feature-check">Akses penuh ke semua endpoint</li>
+                        <li class="feature-check">24/7 priority support</li>
+                        <li class="feature-check">Detailed analytics</li>
+                        <li class="feature-check">Custom integrations</li>
+                    </ul>
+                    <a href="https://wa.me/6283189912927?text=Saya%20ingin%20membeli%20API%20Key%20Enterprise" 
+                       class="block text-center order-button text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300">
+                        Order via WhatsApp
+                    </a>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="product-highlight rounded-xl p-8 mb-16">
+                <h3 class="text-2xl font-bold mb-6 text-center">All Plans Include</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="text-indigo-400 text-4xl mb-4">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h4 class="text-lg font-semibold mb-2">Fast Response</h4>
+                        <p class="text-gray-400">Our servers respond in under 100ms for most requests</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-green-400 text-4xl mb-4">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4 class="text-lg font-semibold mb-2">Secure Connections</h4>
+                        <p class="text-gray-400">All data is encrypted with TLS 1.3 security</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-pink-400 text-4xl mb-4">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <h4 class="text-lg font-semibold mb-2">99.9% Uptime</h4>
+                        <p class="text-gray-400">Guaranteed reliability for your applications</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="mb-16">
+                <h3 class="text-2xl font-bold mb-6 text-center">Frequently Asked Questions</h3>
+                <div class="space-y-4 max-w-3xl mx-auto">
+                    <div class="api-section p-6">
+                        <h4 class="font-semibold mb-2">How do I get my API key after purchase?</h4>
+                        <p class="text-gray-400 text-sm">Your API key will be sent to your WhatsApp immediately after payment confirmation. Typically within 5-10 minutes.</p>
+                    </div>
+                    <div class="api-section p-6">
+                        <h4 class="font-semibold mb-2">What payment methods do you accept?</h4>
+                        <p class="text-gray-400 text-sm">We accept bank transfers (BCA, BRI, Mandiri), QRIS payments, and e-wallets (OVO, Dana, Gopay).</p>
+                    </div>
+                    <div class="api-section p-6">
+                        <h4 class="font-semibold mb-2">Can I upgrade my plan later?</h4>
+                        <p class="text-gray-400 text-sm">Yes, you can upgrade at any time. The remaining days from your current plan will be prorated.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back to Docs -->
+            <div class="text-center">
+                <button class="text-indigo-400 hover:text-indigo-300 transition font-medium" data-page="docs">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to API Documentation
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Cek Status API Key Page -->
+    <div id="cekstatus-page" class="page">
+        <main class="container mx-auto px-6 py-12">
+            <div class="mb-16 text-center">
+                <h2 class="text-3xl font-bold mb-6">Cek Status API Key</h2>
+                <p class="text-lg max-w-2xl mx-auto opacity-90">Masukkan API key Anda untuk memeriksa status dan detailnya.</p>
+            </div>
+            <div class="max-w-xl mx-auto api-section p-8 animate__animated animate__fadeIn">
+                <form id="cekstatus-form" class="space-y-6">
+                    <div>
+                        <label for="apikey-input" class="block text-sm font-medium text-gray-400 mb-2">API Key</label>
+                        <input type="text" id="apikey-input" name="apikey" required placeholder="Masukkan API Key..." class="w-full px-6 py-4 rounded-xl search-bar focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
+                    </div>
+                    <button type="submit" class="w-full order-button text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300">Cek Status</button>
+                </form>
+                <div id="cekstatus-result" class="mt-8 hidden">
+                    <h4 class="text-lg font-semibold mb-3">Hasil Pengecekan</h4>
+                    <div id="cekstatus-success" class="result-section mb-4 hidden">
+                        <pre class="p-3"><code class="language-json">{
+    "status": "success",
+    "data": {
+        "apikey": "p",
+        "expired": "2025-12-31",
+        "name": "Premium User",
+        "active": true
+    }
+}</code></pre>
+                    </div>
+                    <div id="cekstatus-error" class="result-section mb-4 hidden">
+                        <pre class="p-3"><code class="language-json">{
+    "status": "error",
+    "message": "API key tidak valid atau sudah expired."
+}</code></pre>
+                    </div>
+                </div>
+                <div class="mt-4 text-center">
+                    <button class="text-indigo-400 hover:text-indigo-300 transition font-medium" data-page="docs">
+                        <i class="fas fa-arrow-left mr-2"></i> Kembali ke Dokumentasi
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-12">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Wahyu Store</h3>
+                    <p class="text-gray-500 text-sm">Powerful API services for your applications.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Resources</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-indigo-400 transition flex items-center"><i class="fas fa-book mr-2 text-xs"></i> Documentation</a></li>
+                        <li><button data-page="products" class="text-gray-400 hover:text-indigo-400 transition flex items-center"><i class="fas fa-key mr-2 text-xs"></i> API Key Plans</button></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Support</h3>
+                    <ul class="space-y-2">
+                        <li><a href="https://wa.me/6283189912927" class="text-gray-400 hover:text-indigo-400 transition flex items-center"><i class="fas fa-question-circle mr-2 text-xs"></i> Help Center</a></li>
+                        <li><a href="https://wa.me/6283189912927" class="text-gray-400 hover:text-indigo-400 transition flex items-center"><i class="fas fa-envelope mr-2 text-xs"></i> Contact Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Legal</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-indigo-400 transition flex items-center"><i class="fas fa-file-contract mr-2 text-xs"></i> Terms</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-indigo-400 transition flex items-center"><i class="fas fa-shield-alt mr-2 text-xs"></i> Privacy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
+                <p>© 2025 Wahyu Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <script>
+        // Settings object for dynamic API documentation
+        const settings = {
+            creator: "Wahyu Store",
+            whatsapp: "https://wa.me/6283189912927",
+            github: "https://github.com/",
+            youtube: "",
+            apititle: "Wahyu Store",
+            pagetitle: "Wahyu Store API Documentation",
+            apikey: ["p"],
+            endpoints: {
+                orderkuota: [
+                    {
+                        name: "Create Payment",
+                        desc: "Membuat pembayaran QRIS baru.",
+                        status: "Active",
+                        method: "GET",
+                        path: "/api/orkut/createpayment?apikey=&amount=&codeqr=",
+                        example: `{
+  "status": true,
+  "creator": "Wahyu Store",
+  "result": {
+    "transactionId": "WHYUSTR-......",
+    "amount": "99999999",
+    "expirationTime": "2025-07-19T03:58:44.028Z",
+    "qrImageUrl": "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=.....",
+    "qrString": "00020101021226670016COM......"
+  }
+}`,
+                     eror: `{
+    "status": "error",
+    "message": "Invalid parameters"
+}`
+                    },
+                    {
+                        name: "Cek Status",
+                        desc: "Cek status QRIS.",
+                        status: "Active",
+                        method: "GET",
+                        path: "/api/orkut/cekstatus?apikey=&username=&authtoken=",
+                        example: `{
+  "status": true,
+  "data": {
+    "tanggal": "19/07/2025 09:51",
+    "brand_name": "DANA",
+    "amount": "999999",
+    "keterangan": "Bank",
+    "balance": "99999999",
+    "transaction_status": "IN"
+  }
+}`,
+                        eror: `{
+    "status": "error",
+    "message": "404 Not Found"
+}`
+                    },
+                    {
+                        name: "Mutasi QRIS",
+                        desc: "Cek mutasi transaksi QRIS.",
+                        status: "Active",
+                        method: "GET",
+                        path: "/api/mutasi?apikey=&username=&auth_token=",
+                        example: `{
+  "status": true,
+  "data": {
+    "id": 159305610,
+    "debet": "0",
+    "kredit": "9.9999",
+    "saldo_akhir": "99.999",
+    "keterangan": "NOBU / TA***********",
+    "tanggal": "19/07/2025 09:51",
+    "status": "IN",
+    "fee": "",
+    "brand": {
+      "name": "DANA",
+      "logo": "https://app.orderkuota.com/assets/qris/dana.png"
+    }
+  }
+}
+}`,
+                        eror: `{
+    "status": "error",
+    "message": "404 Not Found"
+}`
+                    }
+                ],
+                pulsa: [
+                    {
+                        name: "Cek Harga Pulsa Telkomsel",
+                        desc: "Cek harga pulsa Telkomsel.",
+                        status: "Active",
+                        method: "GET",
+                        path: "/api/cekharga-pulsa-telkomsel?apikey=&auth_username=&auth_token=",
+                        example: `{
+  "status": true,
+  "message": "Berhasil mengambil data harga pulsa Telkomsel",
+  "data": [
+    {
+      "id": 323,
+      "name": "Telkomsel 10.000",
+      "code": "S10",
+      "price": {
+        "nominal": 10163,
+        "formatted": "Rp 10.163"
+      },
+      "additional_validity": "Masa Aktif ±15 Hari\r\n",
+      "status": "Aktif"
+    },
+    {
+      "id": 327,
+      "name": "Telkomsel 100.000",
+      "code": "S100",
+      "price": {
+        "nominal": 97230,
+        "formatted": "Rp 97.230"
+      },
+      "additional_validity": "Masa Aktif ±45 Hari\r\n",
+      "status": "Aktif"
+    },
+  ]
+}`,
+                        eror: `{
+    "status": "error",
+    "message": "404 Not Found"
+}`
+                    },
+                    {
+                        name: "Cek Harga Pulsa Indosat",
+                        desc: "Cek harga pulsa Indosat.",
+                        status: "Active",
+                        method: "GET",
+                        path: "/api/cekharga-pulsa-indosat?apikey=&auth_username=&auth_token=",
+                        example: `{
+  "status": true,
+  "message": "Berhasil mengambil data harga pulsa Indosat",
+  "data": [
+    {
+      "id": 11873,
+      "name": "Indosat 12.000 ",
+      "code": "BISV12",
+      "price": {
+        "nominal": 13083,
+        "formatted": "Rp 13.083"
+      },
+      "additional_validity": "Tidak ada informasi masa aktif",
+      "status": "Aktif"
+    },
+    {
+      "id": 11407,
+      "name": "INDOSAT PRIORITAS 5.000",
+      "code": "INDOSAT-5000",
+      "price": {
+        "nominal": 7150,
+        "formatted": "Rp 7.150"
+      },
+      "additional_validity": "Tidak ada informasi masa aktif",
+      "status": "Aktif"
+    },
+  ]
+}`,
+                        eror: `{
+    "status": "error",
+    "message": "404 Not Found"
+}`
+
+                    },
+                    {
+                        name: "Cek Harga Pulsa XL",
+                        desc: "Cek harga pulsa XL.",
+                        status: "Active",
+                        method: "GET",
+                        path: "/api/cekharga-pulsa-xl?apikey=&auth_username=&auth_token=",
+                        example: `{
+  "status": true,
+  "message": "Berhasil mengambil data harga pulsa XL",
+  "data": [
+    {
+      "id": 8888,
+      "name": "Masa Aktif XL + 1 Hari",
+      "code": "MAXL1E",
+      "price": {
+        "nominal": 1250,
+        "formatted": "Rp 1.250"
+      },
+      "additional_validity": "Tidak ada informasi masa aktif",
+      "status": "Aktif"
+    },
+    {
+      "id": 8889,
+      "name": "Masa Aktif XL + 30 Hari",
+      "code": "MAXLA",
+      "price": {
+        "nominal": 4800,
+        "formatted": "Rp 4.800"
+      },
+      "additional_validity": "Tidak ada informasi masa aktif",
+      "status": "Aktif"
+    },
+  ]
+}`,
+                        eror: `{
+    "status": "error",
+    "message": "404 Not Found"
+}`
+                    }
+                ],
+                produk: [
+                    {
+                        name: "Cek Semua Produk",
+                        desc: "Cek semua produk.",
+                        status: "Active",
+                        method: "GET",
+                        path: "/api/cek-semua-produk?apikey=&auth_username=&auth_token="
+                    },
+                ],
+                qris: [
+                    {
+                        name: "Withdraw QRIS",
+                        desc: "Withdraw saldo QRIS.",
+                        status: "Active",
+                        method: "GET",
+                        path: "/api/qris-withdraw?apikey=&username=&authToken=&amount=",
+                        example: `{
+  "status": true,
+  "message": "Pencairan QRIS segera diproses.",
+  "data": {
+    "withdraw_id": 159318301,
+    "nominal": "1.112",
+    "waktu": "19/07/2025 11:03",
+    "keterangan": "Pencairan Saldo R#27805",
+    "saldo_akhir": "34.99999"
+  }
+}`,
+                        eror: `{
+  "status": "error",
+  "message": "Saldo QRIS tidak mencukupi untuk pencairan."
+}`
+                    }
+                ],
+                auth: [
+                    {
+                        name: "Login",
+                        desc: "Login awal untuk OTP.",
+                        status: "Active",
+                        method: "GET",
+                        path: "/api/login?apikey=&username=&password=",
+                        example: `{
+  "success": true,
+  "results": {
+    "otp": "email",
+    "otp_value": "wah*************mail.com"
+  }
+}`,
+                        eror: `{
+  "success": false,
+  "message": "Username atau password salah."
+}`
+                    },
+                    {
+                        name: "Verifikasi OTP",
+                        desc: "Verifikasi OTP untuk mendapatkan token.",
+                        status: "Active",
+                        method: "GET",
+                        path: "/api/verify-otp?apikey=&username=&otp=",
+                        example: `{
+  "success": true,
+  "results": {
+    "otp": "",
+    "id": "wahyu",
+    "name": "Wahyu Store",
+    "username": "Wahyuu",
+    "balance": "999999",
+    "token": "2918872:........"
+  }
+}`,
+                        eror: `{
+  "success": false,
+  "message": "OTP tidak valid atau sudah kadaluarsa."
+}`,
+                    },
+                    {
+                        name: "Cek Saldo Akun",
+                        desc: "Cek saldo akun.",
+                        status: "Active",
+                        method: "GET",
+                        path: "/api/cek-balance?apikey=&username=&authToken=",
+                        example: `{
+  "status": true,
+  "message": "Berhasil mengambil data saldo",
+  "data": {
+    "name": "Wahyu Store",
+    "username": "wahyuu",
+    "email": "wahyu@gmail.com",
+    "phone": "6283189912927",
+    "balance": {
+      "nominal": 219199,
+      "formatted": "Rp 10.3829"
+    },
+    "qris_balance": {
+      "nominal": 388281,
+      "formatted": "Rp 34.99999999999"
+    },
+    "qrcode": "https://app.orderkuota.com/assets/qrcode/QRIS.png",
+    "qris_url": "https://qris.orderkuota.com/qrnobu/QRIS.png",
+    "qris_name": "WAHYU STORE"
+  }
+}`,
+                        eror: `{
+  "status": "error",
+  "message": "404 Not Found"
+}`
+                    },
+                    {
+                        name: "Beli Kuota",
+                        desc: "Beli kuota.",
+                        status: "Active",
+                        method: "GET",
+                        path: "/api/belikuota?apikey=&auth_username=&auth_token=&code_produk=&phone=&pin=",
+                        example: `{
+  "status": true,
+  "message": "Berhasil order 'Masa Aktif XL + 1 Hari' ke 0877...",
+  "data": {
+    "id": 861687112,
+    "no_hp": "0877...",
+    "id_plgn": "",
+    "harga": 2111,
+    "harga_str": "Rp 1.212",
+    "pembayaran": "Saldo Akun",
+    "status": "861687112",
+    "tanggal": "19/07/2025 11:23",
+    "produk": {
+      "id": "pulsa",
+      "nama": "PULSA NASIONAL"
+    },
+    "provider": {
+      "id": 725,
+      "nama": "+Masa Aktif XL"
+    },
+    "voucher": {
+      "id": 8888,
+      "nominal": "Masa Aktif XL + 1 Hari"
+    },
+    "is_inquiry": false
+  }
+}`,
+                        eror: `{
+  "status": "error",
+  "message": "404 Not Found"
+}`
+                    }
+                ]
+            }
+        };
+
+        // Page switching functionality
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(`${pageId}-page`).classList.add('active');
+            
+            // Update active nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.dataset.page === pageId) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Update document title
+            if (pageId === 'docs') {
+                document.title = "Wahyu Store API Documentation";
+            } else {
+                document.title = "Wahyu Store API Key Packages";
+            }
+        }
+
+        // Dynamically render API categories and endpoints
+        function renderApiDocs() {
+            const apiSection = document.getElementById('dynamic-api-section');
+            apiSection.innerHTML = '';
+            
+            Object.entries(settings.endpoints).forEach(([category, endpoints]) => {
+                // Create category section
+                const categorySection = document.createElement('div');
+                categorySection.className = 'mb-12 fade-in';
+                
+                // Category header with icon
+                let categoryIcon = 'fa-code';
+                let categoryColor = 'text-indigo-400';
+                
+                switch(category.toLowerCase()) {
+                    case 'orderkuota':
+                        categoryIcon = 'fa-qrcode';
+                        categoryColor = 'text-emerald-400';
+                        break;
+                    case 'pulsa':
+                        categoryIcon = 'fa-mobile-alt';
+                        categoryColor = 'text-pink-400';
+                        break;
+                    case 'produk':
+                        categoryIcon = 'fa-box-open';
+                        categoryColor = 'text-amber-400';
+                        break;
+                    case 'qris':
+                        categoryIcon = 'fa-money-bill-wave';
+                        categoryColor = 'text-purple-400';
+                        break;
+                    case 'apikey':
+                        categoryIcon = 'fa-key';
+                        categoryColor = 'text-amber-400';
+                        break;
+                    case 'auth':
+                        categoryIcon = 'fa-user-shield';
+                        categoryColor = 'text-blue-400';
+                        break;
+                }
+                
+                categorySection.innerHTML = `
+                    <div class="flex items-center mb-6">
+                        <i class="fas ${categoryIcon} ${categoryColor} text-2xl mr-3"></i>
+                        <h3 class="text-xl font-bold">${category}</h3>
+                    </div>
+                    <div class="space-y-4" id="${category}-endpoints"></div>
+                `;
+                
+                apiSection.appendChild(categorySection);
+                
+                // Add endpoints for this category
+                const endpointsContainer = document.getElementById(`${category}-endpoints`);
+                
+                endpoints.forEach((endpoint, index) => {
+                    const params = {};
+                    if (endpoint.path.includes('?')) {
+                        endpoint.path.split('?')[1].split('&').forEach(pair => {
+                            const [key] = pair.split('=');
+                            if (key) params[key] = '';
+                        });
+                    }
+                    
+                    let methodBadge = '';
+                    if (endpoint.method === 'GET') {
+                        methodBadge = '<span class="method-badge method-get">GET</span>';
+                    } else if (endpoint.method === 'GET') {
+                        methodBadge = '<span class="method-badge method-get">GET</span>';
+                    } else if (endpoint.method === 'PUT') {
+                        methodBadge = '<span class="method-badge method-put">PUT</span>';
+                    } else if (endpoint.method === 'DELETE') {
+                        methodBadge = '<span class="method-badge method-delete">DELETE</span>';
+                    } else {
+                        methodBadge = `<span class="method-badge">${endpoint.method}</span>`;
+                    }
+                    
+                    let statusBadge = '';
+                    if (endpoint.status === 'Active') {
+                        statusBadge = '<span class="status-indicator status-active"></span>Active';
+                    } else if (endpoint.status === 'Inactive') {
+                        statusBadge = '<span class="status-indicator status-inactive"></span>Inactive';
+                    } else {
+                        statusBadge = '<span class="status-indicator status-deprecated"></span>Deprecated';
+                    }
+                    
+                    // Create endpoint card
+                    const endpointCard = document.createElement('div');
+                    endpointCard.className = 'endpoint-card p-6 cursor-pointer';
+                    endpointCard.style.animationDelay = `${index * 0.05}s`;
+                    endpointCard.setAttribute('data-url', endpoint.path);
+
+                    // Ambil contoh response dari endpoint.example dan endpoint.eror
+                    const exampleResponse = endpoint.example || `{
+    "status": "success",
+    "data": {
+        "example": "response"
+    }
+}`;
+                    const errorResponse = endpoint.eror || `{
+    "status": "error",
+    "message": "Invalid API key"
+}`;
+
+                    endpointCard.innerHTML = `
+                        <div class="flex items-start justify-between mb-4">
+                            <div>
+                                <h4 class="font-semibold text-lg mb-1">${endpoint.name}</h4>
+                                <p class="text-gray-400 text-sm">${endpoint.desc}</p>
+                            </div>
+                            ${methodBadge}
+                        </div>
+                        
+                        <div class="flex items-center justify-between mt-4">
+                            <div class="flex items-center text-xs text-gray-500">
+                                ${statusBadge}
+                            </div>
+                            <button class="text-xs text-indigo-400 hover:text-indigo-300 transition">
+                                <i class="fas fa-chevron-down"></i> Details
+                            </button>
+                        </div>
+                        
+                        <div class="api-details hidden mt-4 pt-4 border-t border-gray-800">
+                            <div class="mb-4">
+                                <h5 class="text-sm font-medium mb-2 text-gray-400">Endpoint URL</h5>
+                                <div class="api-url p-3 text-sm font-mono">${window.location.origin}${endpoint.path}</div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <h5 class="text-sm font-medium mb-2 text-gray-400">Parameters</h5>
+                                    <div class="bg-gray-800 rounded-lg p-3 text-xs font-mono">
+                                        ${Object.keys(params).map(param => `<div class="mb-1">${param}</div>`).join('')}
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h5 class="text-sm font-medium mb-2 text-gray-400">Example Response</h5>
+                                    <div class="result-section">
+                                        <pre class="p-3 mb-3"><code class="language-json">${exampleResponse}</code></pre>
+                                        <pre class="p-3 bg-opacity-50"><code class="language-json">${errorResponse}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 flex justify-end">
+                                <button class="text-xs bg-indigo-900 text-indigo-300 px-3 py-1 rounded hover:bg-indigo-800 transition mr-2 copy-url">
+                                    <i class="fas fa-copy mr-1"></i> Copy URL
+                                </button>
+                                <button class="text-xs bg-gray-800 text-gray-300 px-3 py-1 rounded hover:bg-gray-700 transition">
+                                    <i class="fas fa-share mr-1"></i> Share
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    endpointsContainer.appendChild(endpointCard);
+                });
+            });
+            
+            // Initialize Prism for syntax highlighting
+            if (window.Prism) {
+                Prism.highlightAll();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize page system
+            document.querySelectorAll('[data-page]').forEach(link => {
+                link.addEventListener('click', function() {
+                    switchPage(this.dataset.page);
+                });
+            });
+
+            // Search functionality
+            const searchInput = document.querySelector('input[type="text"]');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const endpointCards = document.querySelectorAll('.endpoint-card');
+                    
+                    endpointCards.forEach(card => {
+                        const title = card.querySelector('h4').textContent.toLowerCase();
+                        const desc = card.querySelector('p').textContent.toLowerCase();
+                        const category = card.closest('[id$="-endpoints"]').id.replace('-endpoints', '');
+                        
+                        if (title.includes(searchTerm)) {
+                            card.style.display = 'block';
+                        } else if (desc.includes(searchTerm)) {
+                            card.style.display = 'block';
+                        } else if (category.includes(searchTerm)) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            }
+
+            // Toggle endpoint details
+            const apiSection = document.getElementById('dynamic-api-section');
+            if (apiSection) {
+                apiSection.addEventListener('click', function(e) {
+                    const card = e.target.closest('.endpoint-card');
+                    const button = e.target.closest('button');
+                    
+                    if (card && button) {
+                        const details = card.querySelector('.api-details');
+                        const isOpen = !details.classList.contains('hidden');
+                        
+                        if (isOpen) {
+                            details.classList.add('hidden');
+                            button.innerHTML = '<i class="fas fa-chevron-down"></i> Details';
+                        } else {
+                            details.classList.remove('hidden');
+                            button.innerHTML = '<i class="fas fa-chevron-up"></i> Hide';
+                            
+                            // Smooth scroll to the expanded card
+                            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    }
+                    
+                    // Copy URL functionality
+                    if (e.target.closest('.copy-url')) {
+                        const url = e.target.closest('.endpoint-card').getAttribute('data-url');
+                        navigator.clipboard.writeText(window.location.origin + url);
+                        
+                        // Show copied feedback
+                        const originalText = e.target.closest('button').innerHTML;
+                        e.target.closest('button').innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+                        
+                        setTimeout(() => {
+                            e.target.closest('button').innerHTML = originalText;
+                        }, 2000);
+                    }
+                });
+            }
+            
+            // Copy API key
+            const copyApiKeyBtn = document.querySelector('.copy-apikey');
+            if (copyApiKeyBtn) {
+                copyApiKeyBtn.addEventListener('click', function() {
+                    const apiKey = settings.apikey[0];
+                    navigator.clipboard.writeText(apiKey);
+                    
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+                    
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                    }, 2000);
+                });
+            }
+            
+            // Cek Status API Key form logic
+            const cekstatusForm = document.getElementById('cekstatus-form');
+            if (cekstatusForm) {
+                cekstatusForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const apikey = document.getElementById('apikey-input').value.trim();
+                    const resultBlock = document.getElementById('cekstatus-result');
+                    const successBlock = document.getElementById('cekstatus-success');
+                    const errorBlock = document.getElementById('cekstatus-error');
+                    resultBlock.classList.remove('hidden');
+                    // Request ke backend
+                    try {
+                        const res = await fetch(`/api/cekstatus-apikey?apikey=${encodeURIComponent(apikey)}`);
+                        const data = await res.json();
+                        if (data.status === 'success') {
+                            // Tampilkan data dinamis
+                            successBlock.classList.remove('hidden');
+                            errorBlock.classList.add('hidden');
+                            successBlock.querySelector('code').textContent = JSON.stringify(data, null, 4);
+                        } else {
+                            successBlock.classList.add('hidden');
+                            errorBlock.classList.remove('hidden');
+                            errorBlock.querySelector('code').textContent = JSON.stringify(data, null, 4);
+                        }
+                    } catch (err) {
+                        successBlock.classList.add('hidden');
+                        errorBlock.classList.remove('hidden');
+                        errorBlock.querySelector('code').textContent = JSON.stringify({ status: 'error', message: 'Gagal terhubung ke server.' }, null, 4);
+                    }
+                });
+            }
+
+            // Initialize the API documentation
+            renderApiDocs();
+        });
+    </script>
+</body>
+</html>
